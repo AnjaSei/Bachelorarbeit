@@ -1,8 +1,5 @@
 #!/usr/bin/env Rscript
 
-#top10 rausziehen + "Referenzgen"
-#fuer jedes Gen durchfuehren
-
 ########################################################################
 ##
 ## File: distances.R
