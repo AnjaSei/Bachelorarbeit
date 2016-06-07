@@ -25,7 +25,6 @@ library(optparse) #to parse command line options
 library(infotheo) #to calculate the mutual information
 library(bigmemory) 
 
-
 #command line options
 option_list <- list(
   make_option(c("-i", "--input"), action="store", help=".dat file with haar wavelet transformed gene expression data from the Allen Brain Atlas"),
