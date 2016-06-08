@@ -78,7 +78,7 @@ comp_euclidean<-function(data, number_genes){
     for(gene in (reference_gene+1):number_genes){
       distance_array[pos]<-sqrt(sum( (data[reference_gene,][-1] - data[gene,][-1])^2 ))
       pos=pos+1
-      print(gene)
+      
     }
   }
   
