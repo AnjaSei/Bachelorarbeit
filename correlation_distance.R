@@ -174,14 +174,14 @@ inputfile<-opt$input
 data<-fread(inputfile, header=TRUE, sep="\t", data.table=FALSE)
 data<-as.matrix(data)
 
-#method to compare gene expression profiles
+#method(s) to compare gene expression profiles
 distance_measures<-names(which(opt==TRUE))
 #save GENEIDs
 gene_ids<-data[,1]
 #save the number of genes
 number_genes<-nrow(data)
 
-##create basic name of the output file
+##create partial name of the output file
 #remove path from the inputfilename
 outputfile<-sub(".*\\/", "", inputfile)
 #remove extension from the inputfilename
