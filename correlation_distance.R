@@ -207,10 +207,10 @@ for (method in distance_measures){
         },
         rio={
            distance_array<-comp_rio(data, number_genes)   
-         },
-         mutual_information={
-           distance_array<-comp_mutual_information(round(data), number_genes) #Werte mussten gerundet werden?   
-         }
+        },
+        mutual_information={
+          distance_array<-comp_mutual_information(round(data), number_genes) #Werte mussten gerundet werden?   
+        }
   )
   
   #save results
