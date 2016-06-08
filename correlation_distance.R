@@ -184,7 +184,7 @@ number_genes<-nrow(data)
 #remove path from the inputfilename
 outputfile<-sub(".*\\/", "", inputfile)
 #remove extension from the inputfilename
-outputfile<-sub("(\\.[[:alnum:]]+$)", "", outputfile)
+outputfile<-sub("(\\.[[:alpha:]]+$)", "", outputfile)
 
 #remark for the outputfile
 remark<-"#The following line contains the distance or correlation between the gene expression profiles for each gene pair. Only the upper triangle of the distance/correlation matrix is saved as a vector.\n#Formula to access the distance between the gene expression profile of the i-th and the j-th gene : number_genes*(i-1)+j-i*(i+1)/2"
