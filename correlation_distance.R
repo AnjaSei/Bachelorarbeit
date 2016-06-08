@@ -2,16 +2,18 @@
 
 ########################################################################
 ##
-## File: distances.R
+## File: correlation_distance.R
 ##
 ## Created by: Anja S.
 ## Created on: June 06, 2016
 ##
-## Description: 
+## Description:   Calculates correlation or distance between the 
+##  haar wavelet transformed gene expression profiles of each gene pair.
 ##     
-## Input: 
+## Input:   File with haar wavelet transformed gene expression profiles.
 ##
-## Output: 
+## Output: File with GeneIDs (first line) and the upper triangle of the 
+##  distance/correlation matrix (second line)
 ##          
 ########################################################################
 
@@ -19,11 +21,12 @@
 #install.packages("optparse")
 #install.packages("infotheo")
 #install.packages("bigmemory")
+#install.packages("data.table")
 
 #load packages
 library(optparse) #to parse command line options
 library(infotheo) #to calculate the mutual information
-library(bigmemory) 
+library(data.table) #fast way to load the data
 
 #command line options
 option_list <- list(
@@ -42,19 +45,16 @@ option_list <- list(
 #parse command line options
 opt <- parse_args(OptionParser(option_list=option_list))
 
-#check if file with gene expression data is given
+#check if file with the gene expression data is given
 if (is.null(opt$input)) {
   stop("No file with haar wavelet transformed gene expression data is given!")
 }
 
-#check if a measurement (to compare haar wavelet transformed gene expression profiles) has been selected
+#check if at least one measurement (to compare haar wavelet transformed gene expression profiles) has been selected
 if(!any(opt$euclidean, opt$spearman, opt$pearson, opt$rio, opt$mutual_information)){
   stop("Select a measurement to compare haar wavelet transformed gene expression profiles!")
 }
-#allow only one measurement method
-if(sum(c(opt$euclidean, opt$spearman, opt$pearson, opt$rio, opt$mutual_information))>1){
-  stop("Choose only ONE measurement to compare haar wavelet transformed gene expression profiles!")
-}
+
 
 #user specified an output/result folder
 if (!is.null(opt$output)) {
@@ -70,8 +70,10 @@ dir.create(path=output_folder, recursive=TRUE)
 
 ########################################Functions###############################################
 
+#computes euclidean distance between transformed gene expression profiles for each  gene pair
 comp_euclidean<-function(data_transformed, number_genes){
   
+  number_genes=10
   distance_array<-numeric(length=number_genes*(number_genes-1)/2)
   
   pos=1
@@ -79,7 +81,7 @@ comp_euclidean<-function(data_transformed, number_genes){
     for(gene in (reference_gene+1):number_genes){
       distance_array[pos]<-sqrt(sum( (data_transformed[reference_gene,][-1] - data_transformed[gene,][-1])^2 ))
       pos=pos+1
-      
+      print(gene)
     }
   }
   
@@ -87,7 +89,7 @@ comp_euclidean<-function(data_transformed, number_genes){
   
 }
 
-
+#computes spearman correlation between transformed gene expression profiles for each  gene pair
 comp_spearman<-function(data_transformed, number_genes){
   
   distance_array<-numeric(length=number_genes*(number_genes-1)/2)
@@ -105,6 +107,7 @@ comp_spearman<-function(data_transformed, number_genes){
   
 }
 
+#computes pearson correlation between transformed gene expression profiles for each  gene pair
 comp_pearson<-function(data_transformed, number_genes){
   
   distance_array<-numeric(length=number_genes*(number_genes-1)/2)
@@ -122,7 +125,7 @@ comp_pearson<-function(data_transformed, number_genes){
   
 }
 
-
+#computes RIO (Relative intensity overlap) between transformed gene expression profiles for each  gene pair
 comp_rio<-function(data_transformed, number_genes){
   
   distance_array<-numeric(length=number_genes*(number_genes-1)/2)
@@ -140,12 +143,13 @@ comp_rio<-function(data_transformed, number_genes){
   
 }
 
-
+#calculate RIO
 rio<-function(a, b){
   rio_ab<-sum(a*b)/sum( ( max(abs(a),abs(b)) )^2 )
     return(rio_ab)
 }
 
+#computes mutual information between transformed gene expression profiles for each  gene pair
 comp_mutual_information<-function(data_transformed, number_genes){
   
   distance_array<-numeric(length=number_genes*(number_genes-1)/2)
@@ -167,44 +171,54 @@ comp_mutual_information<-function(data_transformed, number_genes){
 ################################################################################################
 
 
-##read haar wavelet transformed data
-#file with the gene expression data
-inputfile=opt$input
-#inputfile<-"/home/anja/Schreibtisch/Daten/final/output/haar_wavelet_transformed_data_cube_edge_length_16.txt"
-data_transformed<-read.big.matrix(inputfile, header=TRUE, sep="\t", type="double")
+#read haar wavelet transformed data
+inputfile<-opt$input
+data_transformed<-fread(inputfile, header=TRUE, sep="\t", data.table=FALSE)
+data_transformed<-as.matrix(data_transformed)
 
-#how to compare gene expression profiles
+#method to compare gene expression profiles
 distance_measures<-names(which(opt==TRUE))
+#save GENEIDs
+gene_ids<-data_transformed[,1]
+#save the number of genes
 number_genes<-nrow(data_transformed)
-#number_genes<-10
+
+##create basic name of the output file
+#remove path from the inputfilename
+outputfile<-sub(".*\\/", "", inputfile)
+#remove extension from the inputfilename
+outputfile<-sub("(\\.[[:alnum:]]+$)", "", outputfile)
+
+#remark for the outputfile
+remark<-"#The following line contains the distance or correlation between the haar wavelet transformed gene expression profiles for each gene pair. Only the upper triangle of the distance/correlation matrix is saved as a vector.\n#Formula to access the distance between the gene expression profile of the i-th and the j-th gene : number_genes*(i-1)+j-i*(i+1)/2"
 
 
+#calculate distance or correlation between each gene pair
+#save the upper triangle of the distance or correlation matrix in a vector
 for (method in distance_measures){
   
   switch(method, 
          euclidean={
            distance_array<-comp_euclidean(data_transformed, number_genes)
-           write.table(t(round(distance_array, digits = 8)), col.names=FALSE, sep="\t", append=FALSE, row.names=FALSE, file=paste0(output_folder,strsplit(inputfile, ".txt"),"distance_array_",method,".txt"))
-           
-         },
+        },
          spearman={
-           distance_array<-comp_spearman(data_transformed, number_genes)   
-           write.table(t(round(distance_array, digits = 8)), col.names=FALSE, sep="\t", append=TRUE, row.names=FALSE, file=paste0(output_folder,strsplit(inputfile, ".txt"),"distance_array_",method,".txt"))
+           distance_array<-comp_spearman(data_transformed, number_genes)
            
-           
-         },
+        },
          pearson={
            distance_array<-comp_pearson(data_transformed, number_genes)    
-           write.table(t(round(distance_array, digits = 8)), col.names=FALSE, sep="\t", append=TRUE, row.names=FALSE, file=paste0(output_folder,strsplit(inputfile, ".txt"),"distance_array_", method, ".txt"))
-         },
-         rio={
+        },
+        rio={
            distance_array<-comp_rio(data_transformed, number_genes)   
-           write.table(t(round(distance_array, digits = 8)), col.names=FALSE, sep="\t", append=TRUE, row.names=FALSE, file=paste0(output_folder,strsplit(inputfile, ".txt"),"distance_array_", method, ".txt"))
-           
          },
          mutual_information={
            distance_array<-comp_mutual_information(round(data_transformed), number_genes) #Werte mussten gerundet werden?   
-           write.table(t(round(distance_array, digits = 8)), col.names=FALSE, sep="\t", append=TRUE, row.names=FALSE, file=paste0(output_folder,strsplit(inputfile, ".txt"),"distance_array_", method, ".txt"))
          }
   )
+  
+  #save results
+  write.table(t(c("GENEID", gene_ids)), sep="\t", append=FALSE, file=paste0(output_folder, "/", outputfile, "_distance_array_",method,".txt"), row.names=FALSE, col.names=FALSE)
+  write.table(remark, append=TRUE, file=paste0(output_folder, "/", outputfile, "_distance_array_",method,".txt"), row.names=FALSE, col.names=FALSE)
+  write.table(t(round(distance_array, digits = 10)), sep="\t", append=TRUE, file=paste0(output_folder, "/", outputfile, "_distance_array_",method,".txt"), row.names=FALSE, col.names=FALSE)
+  
 }
