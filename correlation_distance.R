@@ -8,7 +8,7 @@
 ## Created on: June 06, 2016
 ##
 ## Description:   Calculates correlation or distance between the 
-##  haar wavelet transformed gene expression profiles of each gene pair.
+##  haar wavelet transformed gene expression profiles for each gene pair.
 ##     
 ## Input:   File with haar wavelet transformed gene expression profiles.
 ##
@@ -20,7 +20,6 @@
 #install CRAN packages
 #install.packages("optparse")
 #install.packages("infotheo")
-#install.packages("bigmemory")
 #install.packages("data.table")
 
 #load packages
@@ -54,7 +53,6 @@ if (is.null(opt$input)) {
 if(!any(opt$euclidean, opt$spearman, opt$pearson, opt$rio, opt$mutual_information)){
   stop("Select a measurement to compare haar wavelet transformed gene expression profiles!")
 }
-
 
 #user specified an output/result folder
 if (!is.null(opt$output)) {
@@ -143,7 +141,7 @@ comp_rio<-function(data_transformed, number_genes){
   
 }
 
-#calculate RIO
+#calculates RIO
 rio<-function(a, b){
   rio_ab<-sum(a*b)/sum( ( max(abs(a),abs(b)) )^2 )
     return(rio_ab)
