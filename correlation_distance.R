@@ -71,7 +71,6 @@ dir.create(path=output_folder, recursive=TRUE)
 #computes euclidean distance between gene expression profiles for each gene pair
 comp_euclidean<-function(data, number_genes){
   
-  number_genes=10
   distance_array<-numeric(length=number_genes*(number_genes-1)/2)
   
   pos=1
