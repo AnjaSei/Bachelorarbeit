@@ -481,7 +481,7 @@ for (method in distance_measures){
   #add remark to the output file
   write.table(t(remark), sep="\t", append=FALSE, quote=FALSE, file=outputfile, row.names=FALSE, col.names=FALSE)
   #save GeneIDs
-  write.table(t(c(gene_ids,"\n")), sep="\t", append=TRUE, quote=FALSE, file=outputfile, row.names=FALSE, col.names=FALSE)
+  write.table(t(gene_ids), sep="\t", append=TRUE, quote=FALSE, file=outputfile, row.names=FALSE, col.names=FALSE)
   
   switch(method, 
          euclidean={

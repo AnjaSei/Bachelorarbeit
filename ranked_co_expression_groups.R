@@ -7,12 +7,12 @@
 ## Created by: Anja S.
 ## Created on: June 08, 2016
 ##
-## Description:   
+## Description: Calculates ranked co-expression group for each gene.  
 ##     
 ## Input:   File with the GeneIDs and their distance/correlation matrix 
-##  (lower triangle)
+##  (lower triangle).
 ##
-## Output: 
+## Output: File with ranked co-expression group for each gene.
 ##          
 ########################################################################
 
@@ -28,20 +28,46 @@ option_list <- list(
   make_option(c("-o","--output"), action="store", help="result folder (voluntary)"),
   
   #number of genes per ranked co-expression group (RCG); without the gene that defines the RCG
-  make_option(c("-k", "--rcg"), action="store_true", default=FALSE, help="Compare gene expression profiles with euclidean distance")
+  make_option(c("-k", "--rcg"), action="store", help="Compare gene expression profiles with euclidean distance"),
+  
+  #which measurement was used to calculate the distance or correlation matrix from the input file?
+  make_option(c("-e","--euclidean"), action="store_true", default=FALSE, help="Choose this option if the distace matrix was calculated with the euclidean distance."),
+  make_option(c("-s","--spearman"), action="store_true", default=FALSE, help="Choose this option if the distace matrix was calculated with the Spearman correlation coefficient."),
+  make_option(c("-p","--pearson"), action="store_true", default=FALSE, help="Choose this option if the distace matrix was calculated with the Pearson correlation coefficient."),
+  make_option(c("-r","--rio"), action="store_true", default=FALSE, help="Choose this option if the distace matrix was calculated with the RIO (Relative intensity overlap)."),
+  make_option(c("-m","--mutual_information"), action="store_true", default=FALSE, help="Choose this option if the distace matrix was calculated with the mutual information.")
+  
 )
+
+
+################################Functions#########################################
+
+#Returns position of gene i and gene j in the distance array (condensed distance matrix)
+#grosses Dreieck minus kleines Dreieck
+position<-function(i,j,n){return(n*(i-1)+j-(n*(n+1)/2-(n-i+1)*(n-i+2)/2))} 
+
+#anderes kleines Dreieck + Rechteck
+position2<-function(i,j,n){return(n*(i-1)+j-( (i-1)*i/2 + (n-i+1)*(i-1) ))}
+
+
+##################################################################################
 
 #parse command line options
 opt <- parse_args(OptionParser(option_list=option_list))
 
-#check if file with the distance or correlation array is given
+#check if file with the distance or correlation matrix is given
 if (is.null(opt$input)) {
-  stop("No file with the distance or correlation array is given!")
+  stop("No file with the distance or correlation matrix is given!")
 }
 
 #check if the size of the ranked co-expression group is given
 if(is.null(opt$rcg)){
   stop("Enter the size of the ranked co-expression group!")
+}
+
+#check if exactly one correlation or distance measure is given
+if(length(which(opt==TRUE))!=1){
+  stop("Choose the measurement which was used to calculate the distance or correlation matrix from the input file!")
 }
 
 #user specified an output/result folder
@@ -59,6 +85,15 @@ dir.create(path=output_folder, recursive=TRUE)
 #file with the distance or correlation matrix
 inputfile=opt$input
 
+###ACHTUNG entferne Enterzeichen bei GENEIDS
+#open a connection
+connection<-file(inputfile)
+open(connection)
+gene_ids<-scan(file=connection,  what=numeric(), quiet=TRUE, sep="\t",  nlines=1, skip=1)
+distance_array<-scan(file=connection, what=numeric(), quiet=TRUE, sep="\t")
+close(connection)
+
+
 ###distance or correlation matrix from the input file:     
 ##Gene j    a b c ... 
 ##Gene i  
@@ -67,37 +102,23 @@ inputfile=opt$input
 ##    c    4 5 6                  
 ##   ...                          -> distance_array=c(1,2,3,4,5,6 ...)
 
-#open a connection
-connection<-file(inputfile)
-open(connection)
-gene_ids<-scan(file=connection,  what=numeric(), quiet=TRUE, sep="\t",  nlines=1, skip=1)
-distance_array<-scan(file=connection, what=numeric(), quiet=TRUE, sep="\t")
-close(connection)
+#euclidean, spearman, pearson, RIO or mutual information
+method<-names(which(opt==TRUE))
+#size of the ranked co-expression group
+size_rcg<-opt$rcg
+print(size_rcg)
+number_genes<-length(gene_ids) 
+#number_genes<-10
 
-#search for a measurement
-method<-sub(".*(euclidean|spearman|pearson|rio|mutual_information).*", "\\1", outputfile)
 
-##create partial name of the output file
+##create name of the output file
 #remove path from the inputfilename
-outputfile<-sub(".*\\/", "", inputfile)
+raw_outputfile<-sub(".*\\/", "", inputfile)
 #remove extension from the inputfilename
-outputfile<-sub("(\\.[[:alpha:]]+$)", "", outputfile)
+raw_outputfile<-sub("(\\.[[:alpha:]]+$)", "", raw_outputfile)
+outputfile<-paste0(output_folder, "/", raw_outputfile, "_ranked_co_expression_groups_k_", size_rcg, ".txt")
 
-
-#grosses Dreieck minus kleines Dreieck
-position<-function(i,j,n){return(n*(i-1)+j-(n*(n+1)/2-(n-i+1)*(n-i+2)/2))} 
-#anderes kleines Dreieck + Rechteck
-position2<-function(i,j,n){return(n*(i-1)+j-( (i-1)*i/2 + (n-i+1)*(i-1) ))}
-  
-#euclidean
-#moeglichst nah an Null
-
-
-number_genes<-length(gene_ids) #evtl. "GENEIDs" abziehen
-size_rcg<-opt$k
-
-outputfile="/home/anja/Schreibtisch/bla.txt"
-
+#write headline to the output file
 headline<-c("REFERENCE_GENE")
 headline<-append(headline, paste0("GENE",1:size_rcg))
 write.table(t(headline), sep="\t", file=outputfile, col.names=FALSE, row.names=FALSE, append=FALSE, quote=FALSE)
@@ -107,8 +128,10 @@ for(i in 1:number_genes){
   
   rcg_i<-numeric(length=number_genes-1)
   names(rcg_i)<-gene_ids[1:number_genes][-i] #change to gene_ids[-i]
+  
   pos=1
   
+  #select distance or correlation between gene i and gene j
   for(j in 1:number_genes){
     
     if(i!=j){
@@ -128,18 +151,23 @@ for(i in 1:number_genes){
   switch(method, 
     euclidean={  
       rcg_i<-sort(abs(rcg_i), decreasing=FALSE)[1:size_rcg] 
+      print("e")
     },
     spearman={   
       rcg_i<-sort(abs(rcg_i), decreasing=TRUE)[1:size_rcg] 
+      print("s")
     },
     pearson={    
       rcg_i<-sort(abs(rcg_i), decreasing=TRUE)[1:size_rcg]
+      print("p")
     },
     rio={
       rcg_i<-sort(abs(rcg_i), decreasing=TRUE)[1:size_rcg] 
+      print("r")
     },
     mutual_information={
       rcg_i<-sort(abs(rcg_i), decreasing=TRUE)[1:size_rcg]    
+      print("m")
     }
   )
   
