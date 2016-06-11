@@ -477,7 +477,7 @@ distance_measures<-names(which(opt==TRUE))
 for (method in distance_measures){
   
   #create full output filename
-  outputfile<-paste0(output_folder, "/", raw_outputfile, "_distance_array_", method,".txt")
+  outputfile<-paste0(output_folder, "/", raw_outputfile, "_distance_matrix_", method,".txt")
   #add remark to the output file
   write.table(t(remark), sep="\t", append=FALSE, quote=FALSE, file=outputfile, row.names=FALSE, col.names=FALSE)
   #save GeneIDs
