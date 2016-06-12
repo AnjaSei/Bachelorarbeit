@@ -66,7 +66,7 @@ if(is.null(opt$rcg)){
 }
 
 #check if exactly one correlation or distance measure is given
-if(length(which(opt==TRUE))!=1){
+if(sum(opt==TRUE)!=1){
   stop("Choose the measurement which was used to calculate the distance or correlation matrix from the input file!")
 }
 
@@ -89,7 +89,7 @@ inputfile=opt$input
 #open a connection
 connection<-file(inputfile)
 open(connection)
-gene_ids<-scan(file=connection,  what=numeric(), quiet=TRUE, sep="\t",  nlines=1, skip=1)
+gene_ids<-scan(file=connection,  what=numeric(), quiet=TRUE, sep="\t",  nlines=1, skip=1) 
 distance_array<-scan(file=connection, what=numeric(), quiet=TRUE, sep="\t")
 close(connection)
 
@@ -188,4 +188,6 @@ for(i in 1:number_genes){
 
 #mutual information
 #kann nicht negativ sein -> Maximum gesucht
+
+
 
