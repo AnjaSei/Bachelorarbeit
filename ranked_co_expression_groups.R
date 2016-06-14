@@ -24,11 +24,10 @@ library(optparse) #to parse command line options
 
 #command line options
 option_list <- list(
-  make_option(c("-i", "--input"), action="store", help=""),
-  make_option(c("-o","--output"), action="store", help="result folder (voluntary)"),
+  make_option(c("-i", "--input"), action="store", help="File with the GeneIDs and their distance/correlation matrix (lower triangle)."),
+  make_option(c("-o","--output"), action="store", help="Result folder (voluntary)"),
   
-  #number of genes per ranked co-expression group (RCG); without the gene that defines the RCG
-  make_option(c("-k", "--rcg"), action="store", help="Compare gene expression profiles with euclidean distance"),
+  make_option(c("-k", "--rcg"), action="store", type="integer", help="Number of genes per ranked co-expression group (RCG); without the gene that defines the RCG"),
   
   #which measurement was used to calculate the distance or correlation matrix from the input file?
   make_option(c("-e","--euclidean"), action="store_true", default=FALSE, help="Choose this option if the distace matrix was calculated with the euclidean distance."),
@@ -85,7 +84,6 @@ dir.create(path=output_folder, recursive=TRUE)
 #file with the distance or correlation matrix
 inputfile=opt$input
 
-###ACHTUNG entferne Enterzeichen bei GENEIDS
 #open a connection
 connection<-file(inputfile)
 open(connection)
