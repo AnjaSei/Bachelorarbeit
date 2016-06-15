@@ -29,15 +29,15 @@ library(data.table) #provides fast way to load the data
 
 #command line options
 option_list <- list(
-  make_option(c("-i", "--input"), action="store", help=".dat file with (e.g. haar wavelet transformed) gene expression data from the Allen Brain Atlas"),
-  make_option(c("-o","--output"), action="store", help="result folder (optional)"),
+  make_option(c("-i", "--input"), action="store", help=".dat file with (e.g. haar wavelet transformed) gene expression profiles from the Allen Brain Atlas."),
+  make_option(c("-o","--output"), action="store", help="Result folder (optional)."),
   
   #choose a measurement to compare (haar wavelet transformed) gene expression profiles
-  make_option(c("-e","--euclidean"), action="store_true", default=FALSE, help="Compare gene expression profiles with euclidean distance"),
-  make_option(c("-s","--spearman"), action="store_true", default=FALSE, help="Compare gene expression profiles with spearman correlation coefficient"),
-  make_option(c("-p","--pearson"), action="store_true", default=FALSE, help="Compare gene expression profiles with pearson correlation coefficient"),
-  make_option(c("-r","--rio"), action="store_true", default=FALSE, help="Compare gene expression profiles with RIO (Relative intensity overlap)"),
-  make_option(c("-m","--mutual_information"), action="store_true", default=FALSE, help="Compare gene expression profiles with mutual information")
+  make_option(c("-e","--euclidean"), action="store_true", default=FALSE, help="Compare gene expression profiles with euclidean distance."),
+  make_option(c("-s","--spearman"), action="store_true", default=FALSE, help="Compare gene expression profiles with spearman correlation coefficient."),
+  make_option(c("-p","--pearson"), action="store_true", default=FALSE, help="Compare gene expression profiles with pearson correlation coefficient."),
+  make_option(c("-r","--rio"), action="store_true", default=FALSE, help="Compare gene expression profiles with RIO (Relative intensity overlap.)"),
+  make_option(c("-m","--mutual_information"), action="store_true", default=FALSE, help="Compare gene expression profiles with mutual information.")
   
 )
 
@@ -181,7 +181,6 @@ for (method in distance_measures){
       
     #save all distances to gene_i 
     write.table(t(round(distance_array, digits = 8)), sep="\t", append=TRUE, file=outputfile, row.names=FALSE, col.names=FALSE)
-
   }
     
 }
