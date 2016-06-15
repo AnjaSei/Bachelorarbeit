@@ -8,7 +8,8 @@
 ## Created on: June 13, 2016
 ##
 ## Description: Creates reduced gene expression profiles by removing
-##  the positions which were zero in all original gene expression profiles.
+##  the positions which were zero in all original (transformed) gene 
+##  expression profiles.
 ##     
 ## Input: File with the (haar wavelet transformed) gene expression profiles.
 ##
@@ -24,14 +25,14 @@ library(optparse) #to parse command line options
 
 #command line options
 option_list <- list(
-  make_option(c("-i", "--input"), action="store", help="File with (transformed) gene expression data."),
-  make_option(c("-o","--output"), action="store", help="Result folder (voluntary).")
+  make_option(c("-i", "--input"), action="store", help="File with the (transformed) gene expression data."),
+  make_option(c("-o","--output"), action="store", help="Result folder (optional).")
 )
 
 #parse command line options
 opt <- parse_args(OptionParser(option_list=option_list))
 
-#check if file gene expression data is given
+#check if the file with the gene expression data is given
 if (is.null(opt$input)) {
   stop("No file with the gene expression data is given!")
 }
@@ -87,9 +88,9 @@ close(connection)
 zero_positions<-which(!output_array)
 
 
-##create reduced gene expression profiles
+##create the reduced gene expression profiles
 
-#open a new connection
+#open a new connection to the original (transformed) gene expression profiles
 connection<-file(inputfile)
 open(connection)
 
@@ -119,5 +120,4 @@ for(gene in 1:number_genes) {
   write.table(t(data_reduced), col.names=FALSE, sep="\t", append=TRUE, row.names=FALSE, file=outputfile)
   
 }
-
 close(connection)
