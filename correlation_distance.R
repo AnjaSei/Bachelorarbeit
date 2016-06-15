@@ -92,7 +92,7 @@ comp_pearson<-function(gene_i, gene_j){
 #calculates RIO between two gene expression profiles
 comp_rio<-function(gene_i, gene_j){
   
-  rio_ij<-sum(gene_i*gene_j)/sum( ( max(abs(gene_i), abs(gene_j)) )^2 )
+  rio_ij<-sum(gene_i*gene_j)/sum( apply(rbind(abs(gene_i), abs(gene_j)), MARGIN=2, max)^2 )
   return(rio_ij)
 }
 
