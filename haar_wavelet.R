@@ -108,9 +108,6 @@ open(connection)
 com<-paste0("wc -l ", inputfile, " | awk '{ print $1 }'")
 row_number<-as.numeric(system(command=com, intern=TRUE))
 
-#start stopwatch
-#ptm <- proc.time()
-
 ##save coordinates  of the gene expression data in a matrix 
 #(first row -> x-coordinates, second row -> y-coordinates, third row -> z-coordinates)
 headline <- scan(file=connection, nlines=1,  what=character(), quiet=TRUE, sep="\t")
@@ -218,6 +215,3 @@ for(gene in 1:(row_number-1)) {
 
 }
 close(connection)
-
-#stop stopwatch
-#proc.time() - ptm
