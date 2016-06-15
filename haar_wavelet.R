@@ -7,14 +7,14 @@
 ## Created by: Anja S.
 ## Created on: May 30, 2016
 ##
-## Description: Performes Haar wavelet transformation on gene 
-##  expression data from the Allen Brain Atlas
+## Description: Performes Haar wavelet transformation on the gene 
+##  expression data from the Allen Brain Atlas.
 ##     
 ## Input: .dat with gene expression data
 ##  Path to output folder (optional)
 ##  Cube edge length (optional)
 ##
-## Output: .txt with Haar wavelet transformed gene expression data
+## Output: .txt with Haar wavelet transformed gene expression data.
 ##          
 ########################################################################
 
