@@ -14,11 +14,13 @@
 ## Created by: Anja S.
 ## Created on: June 12, 2016
 ##
-## Description: 
+## Description: Determines gene paírs with same annotation in each 
+##  ranked co-expression group.
 ##     
 ## Input:   File with the ranked co-expression groups.
 ##
-## Output: 
+## Output: File which contains number of gene pairs with shared 
+##  annotation for each ranked co-expression group.
 ##          
 ########################################################################
 
@@ -36,7 +38,6 @@ option_list <- list(
   make_option(c("-o","--output"), action="store", help="result folder (voluntary)"),
   
   make_option(c("-a", "--annotation"), action="store", help="File with GeneIDs (first column) and annotation (second column).")
-  
 )
 
 #parse command line options
@@ -96,8 +97,10 @@ outputfile<-paste0(output_folder, "/", rcg_filename, "_annotation_", annotationf
 
 
 #write headline to the resultfile
-headline_resultfile<-c("#ranked_co_expression_group", "number_shared_annotation_pairs")
+headline_resultfile<-c("ranked_co_expression_group", "number_shared_annotation_pairs")
 write.table(t(headline_resultfile), outputfile, row.names=FALSE, col.names=FALSE, sep="\t", append=FALSE, quote=FALSE)
+
+result_matrix<-matrix(data=NA, nrow=number_rcg, ncol=)
 
 #for each ranked co-expression group do:
 for(i in 1:number_rcg) {
@@ -107,23 +110,25 @@ for(i in 1:number_rcg) {
   
   #count gene pairs with shared annotation per rcg
   counter=0
+  print(i)
   for(gene1 in 1:(size_rcg-1)){
     for(gene2 in (gene1+1):size_rcg){
       geneID1<-rcg[gene1]
       geneID2<-rcg[gene2]
-      #print(paste0(geneID1, "|", geneID2))
+
       #select annotations for both GeneIDs
-      anno_gene1<-subset(annotation$ANNOTATION, annotation$GENEID==geneID1) #or annotation[annotation$GENEID==gene1,]$ANNOTATION
-      anno_gene2<-subset(annotation$ANNOTATION, annotation$GENEID==geneID2) #or annotation[annotation$GENEID==gene2,]$ANNOTATION
+     
+      anno_gene1<-annotation[which(annotation$GENEID==geneID1),]$ANNOTATION 
+      anno_gene2<-annotation[which(annotation$GENEID==geneID2),]$ANNOTATION  
 
       #gene pair share at least one annotation
-      if(sum(anno_gene1 %in% anno_gene2)>=1){
+      if(any(anno_gene1 %in% anno_gene2)){
+      #if(sum(anno_gene1 %in% anno_gene2)>=1){
        counter=counter+1
         #print(paste0(anno_gene1, "|", anno_gene2))
       }
     }
   }
-  
   #save results
   write.table(t(c(rcg[1], counter)), outputfile, row.names=FALSE, col.names=FALSE, sep="\t", append=TRUE)
 
