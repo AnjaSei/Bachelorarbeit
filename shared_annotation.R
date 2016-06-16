@@ -1,7 +1,5 @@
 #!/usr/bin/env Rscript
 
-#awk '{s+=$2} END {print s}' test.txt
-
 ########################################################################
 ##
 ## File: shared_annotation.R
@@ -9,8 +7,8 @@
 ## Created by: Anja S.
 ## Created on: June 12, 2016
 ##
-## Description: Determines how many gene paírs share an annotation in 
-##  each ranked co-expression group.
+## Description: Determines the number of gene pairs who share an annotation 
+##  in each ranked co-expression group (RCG).
 ##     
 ## Input:   File with the ranked co-expression groups.
 ##
@@ -29,10 +27,10 @@ library(data.table)
 
 #command line options
 option_list <- list(
-  make_option(c("-i", "--input"), action="store", help="File with ranked co-expression groups."),
-  make_option(c("-o","--output"), action="store", help="result folder (voluntary)"),
+  make_option(c("-i", "--input"), action="store", help="File with the ranked co-expression groups."),
+  make_option(c("-o","--output"), action="store", help="Result folder (optional)."),
   
-  make_option(c("-a", "--annotation"), action="store", help="File with GeneIDs (first column) and annotation (second column).")
+  make_option(c("-a", "--annotation"), action="store", help="File with the GeneIDs (first column) and their annotation (second column).")
 )
 
 #parse command line options
@@ -65,13 +63,13 @@ annotation<-fread(annotationfile, header=FALSE, sep="\t", data.table=FALSE)
 colnames(annotation)<-c("GENEID", "ANNOTATION")
 
 #load file with the ranked co-expression groups
-inputfile=opt$input
+inputfile<-opt$input
 rcg<-fread(inputfile, header=TRUE, sep="\t", data.table=FALSE)
 rcg<-as.matrix(rcg)
 ref_genes<-rcg[,1]
+
 #only around 5000 GeneIDs have an annotation -> set GeneIDs without known annotation to NA
 #to save running time (later in the code)
-
 rcg[which(!(rcg %in% annotation$GENEID))]<-NA
 
 #number genes per RCG
@@ -80,17 +78,17 @@ size_rcg<-ncol(rcg)
 number_rcg<-nrow(rcg)
 
 ##create name of the output file
-#remove path from the inputfilename
+#remove path from the RCG-filename
 rcg_filename<-sub(".*\\/", "", inputfile)
-#remove extension from the inputfilename
+#remove extension from the RCG-filename
 rcg_filename<-sub("(\\.[[:alpha:]]+$)", "", rcg_filename)
 #remove path from the annotation filename
 annotationfilename<-sub(".*\\/", "", annotationfile)
-#remove extension from the inputfilename
+#remove extension from theannotation filename
 annotationfilename<-sub("(\\.[[:alpha:]]+$)", "", annotationfilename)
 outputfile<-paste0(output_folder, "/", rcg_filename, "_annotation_", annotationfilename, ".txt")
 
-#saves for each RCG the number of gene pairs with shared annotation
+#saves the number of gene pairs with shared annotation for each RCG
 shared_anno<-numeric(length=number_rcg)
 
 #for each ranked co-expression group do:
@@ -99,7 +97,7 @@ for(i in 1:number_rcg) {
   #load GeneIDs for each ranked co-expression group
   rcg_i <- rcg[i,]
   
-  #count gene pairs with shared annotation per rcg
+  #count gene pairs with shared annotation per RCG
   counter=0
   for(gene1 in 1:(size_rcg-1)){
     for(gene2 in (gene1+1):size_rcg){
@@ -117,7 +115,6 @@ for(i in 1:number_rcg) {
         
         #gene pair share at least one annotation
         if(any(anno_gene1 %in% anno_gene2)){
-        #if(sum(anno_gene1 %in% anno_gene2)>=1){
           counter=counter+1
         }
         
