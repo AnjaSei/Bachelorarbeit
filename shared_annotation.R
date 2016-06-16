@@ -7,7 +7,7 @@
 ## Created by: Anja S.
 ## Created on: June 12, 2016
 ##
-## Description: Determines the number of gene pairs who share an annotation 
+## Description: Determines the number of gene pairs which share an annotation 
 ##  in each ranked co-expression group (RCG).
 ##     
 ## Input:   File with the ranked co-expression groups.
