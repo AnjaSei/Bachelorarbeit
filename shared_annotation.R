@@ -1,10 +1,5 @@
 #!/usr/bin/env Rscript
 
-#cut -f1 c2.cp.kegg.v5.0.entrez.gene2anno-nodisease.tsv | sort -n | uniq | wc -l
-#5034
-# cut -f1 c5.cc.v5.0.entrez.gene2anno.tsv | sort -n | uniq | wc -l
-#5270
-
 #awk '{s+=$2} END {print s}' test.txt
 
 ########################################################################
@@ -14,8 +9,8 @@
 ## Created by: Anja S.
 ## Created on: June 12, 2016
 ##
-## Description: Determines gene paírs with same annotation in each 
-##  ranked co-expression group.
+## Description: Determines how many gene paírs share an annotation in 
+##  each ranked co-expression group.
 ##     
 ## Input:   File with the ranked co-expression groups.
 ##
@@ -64,8 +59,6 @@ if (!is.null(opt$output)) {
 #create output folder
 dir.create(path=output_folder, recursive=TRUE)
 
-
-
 #load the annotation file
 annotationfile<-opt$annotation
 annotation<-fread(annotationfile, header=FALSE, sep="\t", data.table=FALSE)
@@ -73,16 +66,18 @@ colnames(annotation)<-c("GENEID", "ANNOTATION")
 
 #load file with the ranked co-expression groups
 inputfile=opt$input
-#open a connection
-connection<-file(inputfile)
-open(connection)
+rcg<-fread(inputfile, header=TRUE, sep="\t", data.table=FALSE)
+rcg<-as.matrix(rcg)
+ref_genes<-rcg[,1]
+#only around 5000 GeneIDs have an annotation -> set GeneIDs without known annotation to NA
+#to save running time (later in the code)
 
-#count number of ranked co-expression groups
-com<-paste0("wc -l ", inputfile, " | awk '{ print $1 }'")
-number_rcg<-as.numeric(system(command=com, intern=TRUE))-1 #minus headline
+rcg[which(!(rcg %in% annotation$GENEID))]<-NA
 
-headline_inputfile <- scan(file=connection, nlines=1,  what=character(), quiet=TRUE, sep="\t")
-size_rcg<-length(headline_inputfile)
+#number genes per RCG
+size_rcg<-ncol(rcg)
+#number of RCGs
+number_rcg<-nrow(rcg)
 
 ##create name of the output file
 #remove path from the inputfilename
@@ -95,43 +90,48 @@ annotationfilename<-sub(".*\\/", "", annotationfile)
 annotationfilename<-sub("(\\.[[:alpha:]]+$)", "", annotationfilename)
 outputfile<-paste0(output_folder, "/", rcg_filename, "_annotation_", annotationfilename, ".txt")
 
-
-#write headline to the resultfile
-headline_resultfile<-c("ranked_co_expression_group", "number_shared_annotation_pairs")
-write.table(t(headline_resultfile), outputfile, row.names=FALSE, col.names=FALSE, sep="\t", append=FALSE, quote=FALSE)
-
-result_matrix<-matrix(data=NA, nrow=number_rcg, ncol=)
+#saves for each RCG the number of gene pairs with shared annotation
+shared_anno<-numeric(length=number_rcg)
 
 #for each ranked co-expression group do:
 for(i in 1:number_rcg) {
   
   #load GeneIDs for each ranked co-expression group
-  rcg <- scan(file=connection, nlines=1,  what=numeric(), quiet=TRUE, sep="\t")
+  rcg_i <- rcg[i,]
   
   #count gene pairs with shared annotation per rcg
   counter=0
-  print(i)
   for(gene1 in 1:(size_rcg-1)){
     for(gene2 in (gene1+1):size_rcg){
-      geneID1<-rcg[gene1]
-      geneID2<-rcg[gene2]
-
-      #select annotations for both GeneIDs
-     
-      anno_gene1<-annotation[which(annotation$GENEID==geneID1),]$ANNOTATION 
-      anno_gene2<-annotation[which(annotation$GENEID==geneID2),]$ANNOTATION  
-
-      #gene pair share at least one annotation
-      if(any(anno_gene1 %in% anno_gene2)){
-      #if(sum(anno_gene1 %in% anno_gene2)>=1){
-       counter=counter+1
-        #print(paste0(anno_gene1, "|", anno_gene2))
+      
+      #select GeneIDs
+      geneID1<-rcg_i[gene1]
+      geneID2<-rcg_i[gene2]
+      
+      #both GeneIDs have an annotation 
+      if(!is.na(geneID1) && !is.na(geneID2)){
+        
+        #select annotations
+        anno_gene1<-annotation[which(annotation$GENEID==geneID1),]$ANNOTATION 
+        anno_gene2<-annotation[which(annotation$GENEID==geneID2),]$ANNOTATION  
+        
+        #gene pair share at least one annotation
+        if(any(anno_gene1 %in% anno_gene2)){
+        #if(sum(anno_gene1 %in% anno_gene2)>=1){
+          counter=counter+1
+        }
+        
       }
     }
+    
   }
-  #save results
-  write.table(t(c(rcg[1], counter)), outputfile, row.names=FALSE, col.names=FALSE, sep="\t", append=TRUE)
+  #save the number of gene pairs with shared annotation
+  shared_anno[i]<-counter
 
 }
 
+#save results in the outputfile
+result_matrix<-cbind(ref_genes, shared_anno)
+colnames(result_matrix)<-c("ranked_co_expression_group", "number_shared_annotation_pairs")
+write.table(result_matrix, outputfile, row.names=FALSE, col.names=TRUE, sep="\t", append=FALSE, quote=FALSE)
 
