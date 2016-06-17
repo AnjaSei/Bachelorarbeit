@@ -111,7 +111,13 @@ comp_mutual_information<-function(gene_i, gene_j){
 inputfile<-opt$input
 
 #load gene expression profiles
-data<-fread(inputfile, header=TRUE, sep="\t")
+#file is a gzip-compressed text file
+if(regexpr(".gz", inputfile)[1]==nchar(inputfile)-2){
+  data<-fread(paste0("gunzip -c ", inputfile), header=TRUE, sep="\t")
+  
+}else{
+  data<-fread(inputfile, header=TRUE, sep="\t")
+}
 data<-as.matrix(data)
 
 #method(s) to compare gene expression profiles
