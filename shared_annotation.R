@@ -68,7 +68,7 @@ rcg<-fread(inputfile, header=TRUE, sep="\t", data.table=FALSE)
 rcg<-as.matrix(rcg)
 ref_genes<-rcg[,1]
 
-#only around 5000 GeneIDs have an annotation -> set GeneIDs without known annotation to NA
+#only around 5000 GeneIDs have an annotation -> set GeneIDs without unknown annotation to NA
 #to save running time (later in the code)
 rcg[which(!(rcg %in% annotation$GENEID))]<-NA
 
