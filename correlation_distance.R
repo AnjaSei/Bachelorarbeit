@@ -112,7 +112,7 @@ inputfile<-opt$input
 
 #load gene expression profiles
 #file is a gzip-compressed text file
-if(regexpr(".gz", inputfile)[1]==nchar(inputfile)-2){
+if(identical(substr(inputfile, nchar(inputfile)-2, nchar(inputfile)) ,".gz")){
   data<-fread(paste0("gunzip -c ", inputfile), header=TRUE, sep="\t")
   
 }else{
@@ -133,6 +133,7 @@ number_genes<-nrow(data)
 #remove path from the input filename
 raw_outputfile<-sub(".*\\/", "", inputfile)
 #remove extension from the input filename
+raw_outputfile<-sub("\\.gz$", "", raw_outputfile)
 raw_outputfile<-sub("(\\.[[:alpha:]]+$)", "", raw_outputfile)
 
 #remark for the output file
