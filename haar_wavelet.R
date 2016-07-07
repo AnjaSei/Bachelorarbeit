@@ -33,13 +33,14 @@ library(schoolmath)
 option_list <- list(
   make_option(c("-i", "--input"), action="store", help=".dat file with gene expression data from the Allen Brain Atlas"),
   make_option(c("-o","--output"), action="store", help="result folder (voluntary)"),
-  make_option(c("-c","--cube_edge_length"), action="store", type="integer", help="user specified cube  edge length; must be a multiple of 2 (voluntary)")
+  make_option(c("-c","--cube_edge_length"), action="store", type="integer", help="user specified cube edge length; must be a multiple of 2 (voluntary)"),
+  make_option(c("-d","--decomposition_level"), action="store", type="integer", help="user specified decomposition level; must be <= log2(cube edge length) (voluntary)) ")
 )
 
 #parse command line options
 opt <- parse_args(OptionParser(option_list=option_list))
 
-#check if file with gene expression data is given
+#check if file with the gene expression data is given
 if (is.null(opt$input)) {
   stop("No file with gene expression data is given!")
 }
@@ -49,6 +50,13 @@ if(!is.null(opt$cube_edge_length)){
   if(is.decimal(log2(opt$cube_edge_length))){
     stop("Cube edge length have to be a multiple of 2!")
   }
+}
+
+#if decomposition level and cube edge length were specified by the user: check if they are compatible
+if(!is.null(opt$decomposition_level) && !is.null(opt$cube_edge_length)){
+    if(log2(opt$cube_edge_length)<opt$decomposition_level){
+      stop("Decomposition Level is too high for the specified cube edge length!")
+    }
 }
 
 #user specified an output/result folder
@@ -143,7 +151,14 @@ if(!is.null(opt$cube_edge_length)){
 }
 
 #number of decompositions of the haar wavelet transformation
-decomposition_depth=log2(cube_edge_length)
+if(!is.null(opt$decomposition_level)){
+  if(log2(cube_edge_length)<opt$decomposition_level){
+    stop("Decomposition Level is too high!")
+  }
+  decomposition_depth=opt$decomposition_level
+}else{ #choose the maximum decomposition level
+  decomposition_depth=log2(cube_edge_length)
+}
 
 #center of the given gene expression coordinates, considered as a cuboid
 #(min_x+max_x)/2;  m_x_old=(min(coordinates[1,])+max(coordinates[1,]))/2
@@ -166,7 +181,7 @@ brain<-array(data=0, dim=c(cube_edge_length, cube_edge_length, cube_edge_length)
 
 
 #name of the result file (stores haar wavelet transformed expression data)
-resultfile=paste0(output_folder,"/haar_wavelet_transformed_data_cube_edge_length_",cube_edge_length,".txt")
+resultfile=paste0(output_folder,"/haar_wavelet_transformed_data_cube_edge_length_",cube_edge_length,"_decomposition_level_", decomposition_depth, ".txt")
 
 #build a line for the column names of the resultfile
 column_names<-c("GENEID")
@@ -177,16 +192,18 @@ decomposition_step=1
 repeat{
   data_points<-data_points/2
   for (filtertyp in filter){
-    column_names<-c(column_names, rep(paste0(filtertyp, as.character(decomposition_step)), data_points^3))
+    column_names<-c(column_names, rep(paste0(filtertyp, decomposition_step), data_points^3))
   }
-  if(data_points==1){
-    column_names<-c(column_names, paste0("LLL",decomposition_step))
+  if(decomposition_step==decomposition_depth){
+    column_names<-c(column_names, rep(paste0("LLL",decomposition_step), data_points^3))
     break
+    
   }
   decomposition_step<-decomposition_step+1
   
 }
-write.table(t(column_names), col.names=FALSE, sep="\t", row.names=FALSE, file=resultfile)
+
+write.table(t(column_names), col.names=FALSE, sep="\t", row.names=FALSE, file=resultfile, quote=FALSE)
 
 
 #for each gene do:
