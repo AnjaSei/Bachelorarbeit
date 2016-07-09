@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 			//split line tab by tab and fill the container
                		container=split(line, '\t');
 
-               		if(container.size()!=2){
+               		if(container.size()<2){
                     	cerr<<"Line does not have the two entries GeneID and annotation!"<<endl;
 
                 	}
