@@ -144,7 +144,7 @@ for(rcg in 1:number_rcg) {
 #save the results in the outputfile
 comment<-paste0("#File with the ranked co-expression groups: ", inputfile, 
                 "\n#File with the annotation: ", annotationfile,
-                "\n# k=number of most correlated genes to each gene's RCG")
+                "\n#k=number of most correlated genes to each gene's RCG")
 write.table(comment, outputfile, row.names=FALSE, col.names=FALSE, sep="\t", append=FALSE, quote=FALSE )
 write.table(shared_anno, outputfile, row.names=FALSE, col.names=TRUE, sep="\t", append=TRUE, quote=FALSE)
 
