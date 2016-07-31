@@ -90,61 +90,61 @@ int main(int argc, char* argv[])
 	//parse command line arguments
 	while(index < argc) {
 		//flag for the rcg file
-        if(strcmp(argv[index], "-r") == 0){
+	        if(strcmp(argv[index], "-r") == 0){
 
-            if (index + 1 < argc) {
-                rcgFileName = argv[index+1];
-            }
-            else {
-                // filename missing after -r
-                cerr<<"File with the RCGs is missing after -r!"<<endl;
-                printUsageInfo(argv[0]);
-                return(1);
-            }
-        }
+        	    if (index + 1 < argc) {
+                	rcgFileName = argv[index+1];
+            		}
+            		else {
+                		// filename missing after -r
+                		cerr<<"File with the RCGs is missing after -r!"<<endl;
+                		printUsageInfo(argv[0]);
+                		return(1);
+            		}
+        	}
 
-        //flag for the annoation file
+        	//flag for the annoation file
 		if(strcmp(argv[index], "-a") == 0){
 
-            if (index + 1 < argc) {
-		        annoFileName = argv[index+1];
-		    }
-		    else {
-                // filename missing after -a
-                cerr<<"File with the annoation is missing after -a!"<<endl;
-                printUsageInfo(argv[0]);
-		        return(2);
-		    }
+            		if (index + 1 < argc) {
+		        	annoFileName = argv[index+1];
+	    		}
+	    		else {
+                		// filename missing after -a
+                		cerr<<"File with the annoation is missing after -a!"<<endl;
+                		printUsageInfo(argv[0]);
+	        		return(2);
+	    		}
 		}
 
 		index++;
 	}
 
-    //check if mandatory arguments are given
-    if(rcgFileName.empty()){
+	//check if mandatory arguments are given
+    	if(rcgFileName.empty()){
 
-        cerr<<"File with the RCGs is missing!"<<endl;
-        printUsageInfo(argv[0]);
-        return(1);
-    }
+       		cerr<<"File with the RCGs is missing!"<<endl;
+        	printUsageInfo(argv[0]);
+        	return(1);
+    	}
 
-    if(annoFileName.empty()){
+    	if(annoFileName.empty()){
 
-       	cerr<<"File with the annotation is missing!"<<endl;
-        printUsageInfo(argv[0]);
-       	return(2);
-    }
+       		cerr<<"File with the annotation is missing!"<<endl;
+        	printUsageInfo(argv[0]);
+       		return(2);
+    	}
 
 
 
 	//read file with the RCGs
-    ifstream rcgFile;
-    rcgFile.open(rcgFileName.c_str());
+    	ifstream rcgFile;
+    	rcgFile.open(rcgFileName.c_str());
 
    	if( !rcgFile.is_open() ){
 
-       	cerr <<"Could not open the RCG file!"<< endl;
-       	return(1);
+       		cerr <<"Could not open the RCG file!"<< endl;
+       		return(1);
    	}
 
    	vector<string> container; 		    //saves values of each line from the RCG file
@@ -155,87 +155,85 @@ int main(int argc, char* argv[])
 	//read RCG file line per line
 	while( getline(rcgFile, line) ){
 
-        //line is a comment
-        if( line.substr(0, 1) == "#" ){
-            continue;
-        }
+        	//line is a comment
+        	if( line.substr(0, 1) == "#" ){
+            		continue;
+        	}
 
-        //line is the headline
-        if( line.substr(0,3) == "RCG" ){
-            continue;
-        }
+        	//line is the headline
+        	if( line.substr(0,3) == "RCG" ){
+            		continue;
+        	}
 
 		//split line tab by tab and fill container
 		container = split(line, '\t');
 
 		//each line should contain: RCG, GeneID, rank and distance value
 		if( container.size() != 4 ){
-	    	cerr<<"Line does not have the four entries RCG, GeneID, rank and distance value!"<<endl;
+	    		cerr<<"Line does not have the four entries RCG, GeneID, rank and distance value!"<<endl;
 		}
 		else{
 			//search GeneID which defines this RCG
-	    	RCGit = RCG.find(container[0]);
+	    		RCGit = RCG.find(container[0]);
 
 			//GeneID was not found -> insert it as a key and as the first value of the RCG
-	    	if ( RCGit == RCG.end() ){
-            	RCG.insert( make_pair(container[0], vector<string> (1,container[1])) );
-	    	}
+	    		if ( RCGit == RCG.end() ){
+            			RCG.insert( make_pair(container[0], vector<string> (1,container[1])) );
+	    		}
 			//GeneID was found -> extend this RCG
 			else{
 			   	(RCGit->second).push_back(container[1]);
 			}
 
-        }
+        	}
 
-    }
+    	}
 
-   	rcgFile.close();
+	rcgFile.close();
 
 
 	//read the annotation file
-    ifstream annotationFile;
-    annotationFile.open(annoFileName.c_str());
+    	ifstream annotationFile;
+    	annotationFile.open(annoFileName.c_str());
 
-    if( !annotationFile.is_open() ){
+    	if( !annotationFile.is_open() ){
 
-       	cerr <<"Could not open the annotation file!"<< endl;
-       	return(1);
-    }
+       		cerr <<"Could not open the annotation file!"<< endl;
+       		return(1);
+    	}
 
-    map<string, vector<string> > annotations; 		//save the annotations for each GeneID (==key)
-    map<string, vector<string> >::iterator annoIt;
+    	map<string, vector<string> > annotations; 		//save the annotations for each GeneID (==key)
+    	map<string, vector<string> >::iterator annoIt;
 
 	//read the annotation file line per line
-    while( getline(annotationFile, line) ){
+    	while( getline(annotationFile, line) ){
 
-        //line is a comment
-        if( line.substr(0, 1) == "#" ){
-            continue;
-        }
+        	//line is a comment
+        	if( line.substr(0, 1) == "#" ){
+            		continue;
+        	}
 
 		//split line tab by tab and fill the container
-        container = split(line, '\t');
+        	container = split(line, '\t');
 
-        if( container.size() < 2 ){
-            cerr<<"Line does not have the two entries GeneID and annotation!"<<endl;
-       	}
-        else{
-            //search GeneID
-            annoIt = annotations.find(container[0]);
+        	if( container.size() < 2 ){
+            		cerr<<"Line does not have the two entries GeneID and annotation!"<<endl;
+       		}
+        	else{
+            		//search GeneID
+            		annoIt = annotations.find(container[0]);
 
 			//GeneID was not found -> insert it as a key
-            if ( annoIt == annotations.end() ){
-                annotations.insert( make_pair(container[0], vector<string> (1, container[1])) );
-            }
+            		if ( annoIt == annotations.end() ){
+                		annotations.insert( make_pair(container[0], vector<string> (1, container[1])) );
+            		}
 			//GeneID was found -> add additional annotation
-            else{
-             	(annoIt->second).push_back(container[1]);
-             }
-
-
-        }
-    }
-    annotationFile.close();
+            		else{
+             			(annoIt->second).push_back(container[1]);
+             		}
+        	}
+    	}
+    	annotationFile.close();
 
 
 
@@ -243,7 +241,7 @@ int main(int argc, char* argv[])
 	map<string, vector<unsigned> > sharedAnnoPairs;
 	map<string, vector<unsigned> >::iterator sharedAnnoPairsIt;
 
-    //k=number of most correlated genes to each gene's RCG
+    	//k=number of most correlated genes to each gene's RCG
 	set<unsigned> allK;
 	set<unsigned>::iterator allKit;
 	for ( unsigned i = 1; i <= 5; i++ ) allK.insert(i);
@@ -264,42 +262,42 @@ int main(int argc, char* argv[])
 
 		//for each gene pair do:
 	  	for( unsigned j = 1; j < thisRCG.size(); j++ ){
-            for( unsigned i = 0 ; i < j; i++ ){
+            		for( unsigned i = 0 ; i < j; i++ ){
 
-                //select GeneIDs
-		      	string geneID1=thisRCG[i];
-		      	string geneID2=thisRCG[j];
+                		//select GeneIDs
+		      		string geneID1=thisRCG[i];
+		      		string geneID2=thisRCG[j];
 
 				//select annotations
 				annoIt=annotations.find(geneID1);
 
 				vector<string> annoGene1;
 				if( annoIt != annotations.end() ){
-                    annoGene1 = annoIt->second;
+                    			annoGene1 = annoIt->second;
 				}
 
 				annoIt = annotations.find(geneID2);
 				vector<string> annoGene2;
 				if( annoIt != annotations.end() ){
-                    annoGene2 = annoIt->second;
+                    			annoGene2 = annoIt->second;
 				}
 
 				//GeneIDs share at least one annotation
 				if( contains(annoGene1, annoGene2) ){
-                    counter += 1;
+                    			counter += 1;
 				}
 
-            }
+            		}
 
 			allKit = allK.find(j);
 
-	      	//save number of shared gene pairs for a specific k
-	      	if( allKit != allK.end() ){
+	      		//save number of shared gene pairs for a specific k
+	      		if( allKit != allK.end() ){
 				thisSharedAnnoPairs.push_back(counter);
-	      	}
-        }
+	      		}
+        	}
 
-        sharedAnnoPairs.insert( make_pair(RCGit->first,thisSharedAnnoPairs) );
+        	sharedAnnoPairs.insert( make_pair(RCGit->first,thisSharedAnnoPairs) );
 
 	}
 
@@ -311,23 +309,23 @@ int main(int argc, char* argv[])
 	cout<<"#File with the annotation: "<<annoFileName<<endl;
 	cout<<"#k=number of most correlated genes to each gene's RCG"<<endl;
 
-    //headline
+    	//headline
 	cout<<"RCG";
 	for ( allKit = allK.begin(); allKit != allK.end(); allKit++ ){
-        cout<<'\t'<<"k="<<*allKit;
+        	cout<<'\t'<<"k="<<*allKit;
 	}
 	cout<<""<<endl;
 
 	vector<unsigned> thisSharedAnnoPairs;
 	for(sharedAnnoPairsIt = sharedAnnoPairs.begin(); sharedAnnoPairsIt != sharedAnnoPairs.end(); sharedAnnoPairsIt++){
 
-        cout<<sharedAnnoPairsIt->first;
-        thisSharedAnnoPairs = sharedAnnoPairsIt->second;
-        for (unsigned i = 0; i < thisSharedAnnoPairs.size(); i++ ){
+        	cout<<sharedAnnoPairsIt->first;
+        	thisSharedAnnoPairs = sharedAnnoPairsIt->second;
+        	for (unsigned i = 0; i < thisSharedAnnoPairs.size(); i++ ){
 
-                cout<<'\t'<<thisSharedAnnoPairs[i];
-        }
-        cout<<""<<endl;
+                	cout<<'\t'<<thisSharedAnnoPairs[i];
+        	}
+        	cout<<""<<endl;
 	}
 
 
