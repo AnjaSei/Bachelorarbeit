@@ -105,7 +105,7 @@ raw_outputfile<-sub(".*\\/", "", inputfile)
 raw_outputfile<-sub("(\\.[[:alpha:]]+$)", "", raw_outputfile)
 outputfile<-paste0(output_folder, "/", raw_outputfile, "_without_zero_data_points.txt")
 
-write.table(t(headline_reduced), col.names=FALSE, sep="\t", row.names=FALSE, file=outputfile, append=FALSE) 
+write.table(t(headline_reduced), col.names=FALSE, sep="\t", quote=FALSE, row.names=FALSE, file=outputfile, append=FALSE) 
 
 #read again the gene expression profile for each gene and remove the all-zero positions
 for(gene in 1:number_genes) {
