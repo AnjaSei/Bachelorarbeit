@@ -264,25 +264,25 @@ int main(int argc, char* argv[])
 	  	for( unsigned j = 1; j < thisRCG.size(); j++ ){
             		for( unsigned i = 0 ; i < j; i++ ){
 
-                		//select GeneIDs
-		      		string geneID1=thisRCG[i];
-		      		string geneID2=thisRCG[j];
+                		//select geneIDs
+		      		string geneID1 = thisRCG[i];
+		      		string geneID2 = thisRCG[j];
 
-				//select annotations
-				annoIt=annotations.find(geneID1);
-
+				//select annotations for geneID1
+				annoIt = annotations.find(geneID1);
 				vector<string> annoGene1;
 				if( annoIt != annotations.end() ){
                     			annoGene1 = annoIt->second;
 				}
 
+				//select annoations for geneID2
 				annoIt = annotations.find(geneID2);
 				vector<string> annoGene2;
 				if( annoIt != annotations.end() ){
                     			annoGene2 = annoIt->second;
 				}
 
-				//GeneIDs share at least one annotation
+				//gene1 and gene2 share at least one annotation
 				if( contains(annoGene1, annoGene2) ){
                     			counter += 1;
 				}
@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
 	      		}
         	}
 
-        	sharedAnnoPairs.insert( make_pair(RCGit->first,thisSharedAnnoPairs) );
+        	sharedAnnoPairs.insert( make_pair(RCGit->first , thisSharedAnnoPairs) );
 
 	}
 
