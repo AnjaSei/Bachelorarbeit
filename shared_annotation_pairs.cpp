@@ -89,8 +89,13 @@ int main(int argc, char* argv[])
 
 	//parse command line arguments
 	while(index < argc) {
+        	//help message
+	        if(strcmp(argv[index], "-h") == 0){
+                	printUsageInfo(argv[0]);
+                	return(0);
+        	}
 		//flag for the rcg file
-	        if(strcmp(argv[index], "-r") == 0){
+	       else if(strcmp(argv[index], "-r") == 0){
 
         	    if (index + 1 < argc) {
                 	rcgFileName = argv[index+1];
@@ -104,7 +109,7 @@ int main(int argc, char* argv[])
         	}
 
         	//flag for the annoation file
-		if(strcmp(argv[index], "-a") == 0){
+		else if(strcmp(argv[index], "-a") == 0){
 
             		if (index + 1 < argc) {
 		        	annoFileName = argv[index+1];
