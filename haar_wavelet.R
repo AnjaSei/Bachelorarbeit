@@ -48,7 +48,7 @@ if (is.null(opt$input)) {
 #if cube edge length was specified by the user: check if it is a multiple of 2
 if(!is.null(opt$cube_edge_length)){
   if(is.decimal(log2(opt$cube_edge_length))){
-    stop("Cube edge length have to be a multiple of 2!")
+    stop("Cube edge length must be a multiple of 2!")
   }
 }
 
@@ -135,7 +135,7 @@ if(!is.null(opt$cube_edge_length)){
   #it is  okay to consider only the first and the last coordinate because only whole data planes 
   #(with only zero-intensities) and no single coordinates are missing in the gene expression data set
   
-  range_x<-coordinates[1, ncol(coordinates)]-coordinates[1,1]+1 #==range_y<-max(coordinates[1,])-min(coordinates[1,])+1
+  range_x<-coordinates[1, ncol(coordinates)]-coordinates[1,1]+1 #==range_x<-max(coordinates[1,])-min(coordinates[1,])+1
   range_y<-coordinates[2, ncol(coordinates)]-coordinates[2,1]+1 #==range_y<-max(coordinates[2,])-min(coordinates[2,])+1
   range_z<-coordinates[3, ncol(coordinates)]-coordinates[3,1]+1 #==range_z<-max(coordinates[3,])-min(coordinates[3,])+1
   
