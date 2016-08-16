@@ -355,7 +355,7 @@ int main(int argc, char* argv[])
                 }
             }
             //candidateGene == diseaseGene
-            if ((thisLocusSizeC <= locusSize || thisLocusSizeT <= locusSize) && dist == 0){
+            if (dist == 0){
                 //checked before if the disease gene has an expression profile
                 effectiveCandidateList.push_back(candidateList[i]);
             }
